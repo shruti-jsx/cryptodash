@@ -88,6 +88,7 @@ export const registerUser = async (req: Request, res: Response) => {
 // POST /login
 export const loginUser = async (req: Request, res: Response) => {
   const { username, password } = req.body;
+  console.log("username: ",username," Pass: ",password);
   try {
     // check if user exists
     const user = await User.findOne({ username });
@@ -102,7 +103,7 @@ export const loginUser = async (req: Request, res: Response) => {
     }
 
     const { accessToken, refreshToken } = generateTokens(user);
-
+    console.log("Logged in!");
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",

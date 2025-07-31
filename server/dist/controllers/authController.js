@@ -88,6 +88,7 @@ exports.registerUser = registerUser;
 // POST /login
 const loginUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { username, password } = req.body;
+    console.log("username: ", username, " Pass: ", password);
     try {
         // check if user exists
         const user = yield User_1.User.findOne({ username });
@@ -100,6 +101,7 @@ const loginUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             return res.status(401).json({ msg: "Incorrect Credentials" });
         }
         const { accessToken, refreshToken } = (0, jwtServices_1.generateTokens)(user);
+        console.log("Logged in!");
         res.cookie("refreshToken", refreshToken, {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",

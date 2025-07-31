@@ -17,7 +17,6 @@ const data_1 = __importDefault(require("./routes/data"));
 const upload_1 = __importDefault(require("./routes/upload"));
 dotenv_1.default.config();
 const ORIGIN_URL = process.env.ORIGIN_URL || "http://localhost:5173";
-const jwt = process.env.JWT_ACCESS_SECRET;
 // express app & http server
 const app = (0, express_1.default)();
 const server = (0, node_http_1.createServer)(app);
@@ -52,5 +51,5 @@ app.set("socketio", io);
 // start server
 const PORT = process.env.PORT || 8000;
 server.listen(PORT, () => {
-    console.log(`Express listening on port: ${PORT}, ${jwt}`);
+    console.log(`Express listening on port: ${PORT}`);
 });

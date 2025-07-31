@@ -14,7 +14,6 @@ import uploadRouter from "./routes/upload";
 dotenv.config();
 
 const ORIGIN_URL = process.env.ORIGIN_URL || "http://localhost:5173";
-const jwt = process.env.JWT_ACCESS_SECRET;
 
 // express app & http server
 const app: Express = express();
@@ -58,7 +57,7 @@ app.set("socketio", io);
 // start server
 const PORT = process.env.PORT || 8000;
 server.listen(PORT, () => {
-  console.log(`Express listening on port: ${PORT}, ${jwt}`);
+  console.log(`Express listening on port: ${PORT}`);
 });
 
 // extend Express request type to include io
