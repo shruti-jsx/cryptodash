@@ -66,7 +66,7 @@ export const registerUser = async (req: Request, res: Response) => {
     res.cookie("token", token, {
       httpOnly: true,
       maxAge: 3600000, // 1hr
-      sameSite: "lax",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
       secure: process.env.NODE_ENV === "production",
     });
 
