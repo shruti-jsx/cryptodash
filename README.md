@@ -2,7 +2,7 @@
 
 ## 🖥️ Live Demo
 
-👉 [CryptoDash Live](https://dashecrypte.netlify.app/) *(to be updated after deployment)*
+👉 [CryptoDash Live](https://cryptodashe.netlify.app/)
 
 ---
 
