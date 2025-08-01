@@ -6,6 +6,7 @@ import {
   deleteCoin,
   editCoin,
 } from "../controllers/portfolioController";
+import { fetchPortfolioValue, addPortfolioValue } from "../services/portfolioServices";
 import { authenticateJWT } from "../strategies/passportJwt";
 const router = Router();
 
@@ -23,5 +24,6 @@ router.delete("/delete", authenticateJWT, deleteCoin);
 
 // PATCH -> edit coin holding amount
 router.patch("/edit", authenticateJWT, editCoin);
+
 
 export default router;

@@ -15,6 +15,7 @@ import { adaptToPortfolioCoinType, fetchPortfolioCoinData } from "@/lib";
 import { CoinDB, DetailedCoin } from "@/types";
 import socket from "@/socket/socket";
 import CoinDescriptionCard from "./CoinDescriptionCard";
+import CoinChartCard from "./CoinChartCard";
 
 interface PortfolioUpdateEvent {
   userId: string;
@@ -31,6 +32,7 @@ export default function CoinPanel() {
   const locationPath = location.pathname.split("/");
   const coinId = locationPath[locationPath.length - 1];
 
+  
   useEffect(() => {
     const initializeCoinData = async () => {
       // check if coin is within portfolio
@@ -130,12 +132,23 @@ export default function CoinPanel() {
         className="w-full md:col-start-1 md:row-start-3 md:col-span-2"
       />
 
-      {coinData.info.description && (
-        <CoinDescriptionCard
-          description={coinData.info.description}
+      {coinData && (
+        <CoinChartCard
+          symbol={coinData.info.symbol}
           className="w-full md:col-start-1 md:row-start-4 md:col-span-3"
         />
       )}
+
+      {coinData.info.description && (
+        <CoinDescriptionCard
+          description={coinData.info.description}
+          className="w-full md:col-start-1 md:row-start-5 md:col-span-3"
+        />
+      )}
+
+      
+
+
     </section>
   );
 }
