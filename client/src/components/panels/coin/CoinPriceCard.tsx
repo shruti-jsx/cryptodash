@@ -2,7 +2,6 @@ import { formatCurrency } from "@/lib";
 import { Card, CardDescription, CardHeader, CardTitle } from "../../ui/card";
 import { DetailedCoin } from "@/types";
 import { useUserStore } from "@/stores/useUserStore";
-import { Currency } from "lucide-react";
 
 interface CoinPriceCardProps {
   coin: DetailedCoin | null;

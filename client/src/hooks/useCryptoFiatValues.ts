@@ -12,6 +12,7 @@ const getBatchCryptoFiatValues = async (coinIds: string[], fiatCurrency: string)
     });
 
     const json = await res.json();
+    console.log(json);
     return json.data || {};
   } catch (err) {
     console.error("Batch price fetch failed:", err);
@@ -26,6 +27,7 @@ const getBatchCryptoFiatValues = async (coinIds: string[], fiatCurrency: string)
     });
 
     const json = await res.json();
+    console.log(json);
     return json.data?.[coinId]?.[fiatCurrency] || 0;
   } catch (err) {
     console.error("Single price fetch failed:", err);

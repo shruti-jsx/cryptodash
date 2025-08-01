@@ -37,19 +37,19 @@ export default function CryptoListTable({
   const navigate = useNavigate();
   const currency = useUserStore((state) => state.currency);
   const { getBatchCryptoFiatValues } = useCryptoFiatValues();
-  const [priceMap, setPriceMap] = useState<{ [key: string]: number }>({});
+  const [priceMap, setPriceMap] = useState<{ [key: string]: { [currency: string]: number } }>({});
 
   useEffect(() => {
-  const fetchPrices = async () => {
-    const ids = cryptoList.map((coin) => coin.id);
-    if (!ids.length) return;
-    const prices = await getBatchCryptoFiatValues(ids, currency);
-    setPriceMap(prices);
-  };
+    const fetchPrices = async () => {
+      const ids = cryptoList.map((coin) => coin.id);
+      if (!ids.length) return;
+      const prices = await getBatchCryptoFiatValues(ids, currency);
+      console.log("Fetched prices:", prices);
+      setPriceMap(prices);
+    };
 
-  fetchPrices();
-}, [cryptoList, currency]);
-
+    fetchPrices();
+  }, [cryptoList, currency]);
 
   const handleRowClick = (coinId: string) => {
     navigate(`/app/coin/${coinId}`);
@@ -70,16 +70,16 @@ export default function CryptoListTable({
       <TableBody>
         {cryptoList.map((coin, i) => {
           const isCoinObject = "current_price" in coin;
-          const coinPrice = priceMap[coin.id] ?? (isCoinObject ? coin.current_price : null);
+          const coinPriceObj = priceMap[coin.id];
+          const convertedPrice = coinPriceObj?.[currency];
+          const coinPrice = convertedPrice ?? (isCoinObject ? coin.current_price : null);
 
           const marketCap =
-            priceMap[coin.id] && isCoinObject
-              ? (coin.market_cap / coin.current_price) * priceMap[coin.id]
+            convertedPrice && isCoinObject
+              ? (coin.market_cap / coin.current_price) * convertedPrice
               : isCoinObject
               ? coin.market_cap
               : null;
-
-
 
           return (
             <TableRow
@@ -87,7 +87,7 @@ export default function CryptoListTable({
               className="cursor-pointer"
               onClick={() => handleRowClick(coin.id)}
             >
-              <TableCell>{coin.market_cap_rank || "N/A"}</TableCell>
+              <TableCell>{("market_cap_rank" in coin && coin.market_cap_rank) || "N/A"}</TableCell>
               <TableCell>
                 <img
                   src={"image" in coin ? coin.image : coin.thumb}
