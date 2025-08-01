@@ -7,7 +7,7 @@ export default function useCryptoFiatValues() {
 const getBatchCryptoFiatValues = async (coinIds: string[], fiatCurrency: string) => {
   try {
     const idsParam = coinIds.join(",");
-    const res = await fetch(`${API_BASE_URL}/simple-price?ids=${idsParam}&vs_currency=${fiatCurrency}`, {
+    const res = await fetch(`${API_BASE_URL}/data/simple-price?ids=${idsParam}&vs_currency=${fiatCurrency}`, {
       credentials: "include",
     });
 
@@ -21,7 +21,7 @@ const getBatchCryptoFiatValues = async (coinIds: string[], fiatCurrency: string)
 
  const getSingleCryptoFiatValue = async (coinId: string, fiatCurrency: string) => {
   try {
-    const res = await fetch(`${API_BASE_URL}/simple-price/${coinId}?vs_currency=${fiatCurrency}`, {
+    const res = await fetch(`${API_BASE_URL}/data/simple-price/${coinId}?vs_currency=${fiatCurrency}`, {
       credentials: "include",
     });
 
