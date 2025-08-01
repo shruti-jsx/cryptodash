@@ -205,3 +205,60 @@ export const fetchSearchResults = async (req: Request, res: Response) => {
       .json({ success: false, msg: "Failed to run search" });
   }
 };
+
+// BATCH PRICE FETCH
+export const fetchSimplePrices = async (req: Request, res: Response) => {
+  const ids = req.query.ids as string;
+  const vsCurrency = req.query.vs_currency as string;
+
+  if (!ids || !vsCurrency) {
+    return res.status(400).json({ success: false, msg: "Missing ids or vs_currency" });
+  }
+
+  const url = `https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=${vsCurrency}`;
+
+  try {
+    const response = await fetch(url, {
+      headers: {
+        accept: "application/json",
+        "x-cg-demo-api-key": COINGECKO_API_KEY,
+      },
+    });
+
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const data = await response.json();
+    res.status(200).json({ success: true, data });
+  } catch (error) {
+    console.error("Batch price fetch error:", error);
+    res.status(500).json({ success: false, msg: "Batch price fetch failed" });
+  }
+};
+
+// SINGLE COIN PRICE FETCH
+export const fetchSinglePrice = async (req: Request, res: Response) => {
+  const coinId = req.params.coinId;
+  const vsCurrency = req.query.vs_currency as string;
+
+  if (!coinId || !vsCurrency) {
+    return res.status(400).json({ success: false, msg: "Missing coinId or vs_currency" });
+  }
+
+  const url = `https://api.coingecko.com/api/v3/simple/price?ids=${coinId}&vs_currencies=${vsCurrency}`;
+
+  try {
+    const response = await fetch(url, {
+      headers: {
+        accept: "application/json",
+        "x-cg-demo-api-key": COINGECKO_API_KEY,
+      },
+    });
+
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const data = await response.json();
+    res.status(200).json({ success: true, data });
+  } catch (error) {
+    console.error("Single price fetch error:", error);
+    res.status(500).json({ success: false, msg: "Single price fetch failed" });
+  }
+};
+

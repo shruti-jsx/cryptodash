@@ -47,7 +47,7 @@ export default function ConverterCard({
   coin,
   className = "",
 }: ConverterCardProps) {
-  const { getCryptoFiatValues } = useCryptoFiatValues(); // ✅ singular function name
+  const { getSingleCryptoFiatValue } = useCryptoFiatValues(); // ✅ singular function name
   const userCurrency = useUserStore((s) => s.currency); // ✅ globally selected currency (like 'usd')
 
   const [cryptoAmount, setCryptoAmount] = useState("");
@@ -71,13 +71,13 @@ export default function ConverterCard({
     );
   }
 
-  const getFiatIdAndPrice = async (fiatName: string) => {
+ const getFiatIdAndPrice = async (fiatName: string) => {
   const fiat = fiatList.find((f) => f.name === fiatName);
-  const fiatId = fiat?.id || "usd";
-  const priceData = await getCryptoFiatValues(coin.id);
-  const price = priceData[fiatId];
+  const fiatId = fiat?.id || userCurrency;
+  const price = await getSingleCryptoFiatValue(coin.id, fiatId);
   return { fiatId, cryptoCurrentPrice: price };
 };
+
 
 
   const cryptoToFiatCalculation = async (

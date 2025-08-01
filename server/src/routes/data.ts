@@ -6,6 +6,8 @@ import {
   fetchAllCoinsWithMarketDataRecursive,
   fetchTotalMcapData,
   fetchSearchResults,
+  fetchSimplePrices,
+  fetchSinglePrice,
 } from "../controllers/dataController";
 import { authenticateJWT } from "../strategies/passportJwt";
 const router = Router();
@@ -35,5 +37,9 @@ router.get("/total-market-cap", authenticateJWT, fetchTotalMcapData);
 
 // GET -> /search?query=
 router.get("/search", authenticateJWT, fetchSearchResults);
+
+router.get("/simple-price", fetchSimplePrices);
+router.get("/simple-price/:coinId", fetchSinglePrice);
+
 
 export default router;

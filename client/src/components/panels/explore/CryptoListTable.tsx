@@ -15,36 +15,18 @@ import { useUserStore } from "@/stores/useUserStore";
 import useCryptoFiatValues from "@/hooks/useCryptoFiatValues";
 
 export interface CoinObject {
-  ath: number;
-  ath_change_percentage: number;
-  ath_date: string;
-  atl: number;
-  atl_change_percentage: number;
-  atl_date: string;
-  circulating_supply: number;
-  current_price: number;
-  fully_diluted_valuation: number;
-  high_24h: number;
   id: string;
-  image: string;
-  last_updated: string;
-  low_24h: number;
-  market_cap: number;
-  market_cap_change_24h: number;
-  market_cap_change_percentage_24h: number;
-  market_cap_rank: number;
-  max_supply: number;
   name: string;
-  price_change_24h: number;
-  price_change_percentage_24h: number;
-  roi: null;
   symbol: string;
-  total_supply: number;
-  total_volume: number;
+  image: string;
+  market_cap_rank: number;
+  current_price: number;
+  market_cap: number;
+  price_change_percentage_24h: number;
 }
 
 interface CryptoListTableProps {
-  cryptoList: (CoinObject | AddedCoin)[]; // from explore or search
+  cryptoList: (CoinObject | AddedCoin)[];
   loading: boolean;
 }
 
@@ -54,18 +36,15 @@ export default function CryptoListTable({
 }: CryptoListTableProps) {
   const navigate = useNavigate();
   const currency = useUserStore((state) => state.currency);
-  const { getCryptoFiatValues } = useCryptoFiatValues();
+  const { getBatchCryptoFiatValues } = useCryptoFiatValues();
   const [priceMap, setPriceMap] = useState<{ [key: string]: number }>({});
 
   useEffect(() => {
   const fetchPrices = async () => {
-    // collect all unique IDs regardless of type
     const ids = cryptoList.map((coin) => coin.id);
-
-    if (ids.length > 0) {
-      const prices = await getCryptoFiatValues(ids, currency);
-      setPriceMap(prices);
-    }
+    if (!ids.length) return;
+    const prices = await getBatchCryptoFiatValues(ids, currency);
+    setPriceMap(prices);
   };
 
   fetchPrices();
@@ -91,12 +70,15 @@ export default function CryptoListTable({
       <TableBody>
         {cryptoList.map((coin, i) => {
           const isCoinObject = "current_price" in coin;
-          const coinPrice = priceMap[coin.id] ?? ("current_price" in coin ? coin.current_price : null);
+          const coinPrice = priceMap[coin.id] ?? (isCoinObject ? coin.current_price : null);
 
+          const marketCap =
+            priceMap[coin.id] && isCoinObject
+              ? (coin.market_cap / coin.current_price) * priceMap[coin.id]
+              : isCoinObject
+              ? coin.market_cap
+              : null;
 
-          const marketCap = isCoinObject
-            ? coin.market_cap
-            : priceMap[coin.id] ?? null;
 
 
           return (
@@ -105,25 +87,17 @@ export default function CryptoListTable({
               className="cursor-pointer"
               onClick={() => handleRowClick(coin.id)}
             >
-              <TableCell>
-                <div className="font-medium flex items-center">
-                  {isCoinObject
-                    ? coin.market_cap_rank
-                    : coin.market_cap_rank || "N/A"}
-                </div>
-              </TableCell>
+              <TableCell>{coin.market_cap_rank || "N/A"}</TableCell>
               <TableCell>
                 <img
-                  src={isCoinObject ? coin.image : coin.thumb}
-                  alt={`${coin.name} logo`}
+                  src={"image" in coin ? coin.image : coin.thumb}
+                  alt={coin.name}
                   className="w-6 h-6"
                 />
               </TableCell>
               <TableCell>{coin.name}</TableCell>
               <TableCell>
-                {coinPrice !== null
-                  ? formatCurrency(coinPrice, currency)
-                  : "N/A"}
+                {coinPrice !== null ? formatCurrency(coinPrice, currency) : "N/A"}
               </TableCell>
               <TableCell
                 className={
@@ -132,45 +106,11 @@ export default function CryptoListTable({
                     : "text-green-600"
                 }
               >
-                <div className="flex justify-end items-center">
-                  {isCoinObject
-                    ? `${roundToTwoDecimalPlaces(
-                        coin.price_change_percentage_24h
-                      )}%`
-                    : "N/A"}
-                  {isCoinObject &&
-                    (coin.price_change_percentage_24h < 0 ? (
-                      <svg
-                        className="w-4 h-4 mt-[2px]"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          d="M6 9L12 15L18 9"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      </svg>
-                    ) : (
-                      <svg
-                        className="w-4 h-4 mt-[2px]"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          d="M18 15L12 9L6 15"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      </svg>
-                    ))}
-                </div>
+                {isCoinObject
+                  ? `${roundToTwoDecimalPlaces(
+                      coin.price_change_percentage_24h
+                    )}%`
+                  : "N/A"}
               </TableCell>
               <TableCell className="text-right">
                 {marketCap !== null

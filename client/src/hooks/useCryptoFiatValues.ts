@@ -1,56 +1,38 @@
-import { useState } from "react";
+// useCryptoFiatValues.ts
 
+
+
+import { API_BASE_URL } from "@/config";
 export default function useCryptoFiatValues() {
-  const [priceCache, setPriceCache] = useState<{ [key: string]: { [currency: string]: number } }>({});
-
-  const getCryptoFiatValues = async (coinIds: string[], currency: string) => {
-    const prices: { [key: string]: number } = {};
-
-    // filter IDs that are not cached or expired
-    const idsToFetch: string[] = coinIds.filter((id) => {
-      const entry = priceCache[id];
-      if (!entry) return true;
-      const isFresh = Date.now() - entry.timestamp < 3600_000; // 1 hour
-      return !isFresh || !(currency in entry.value);
+const getBatchCryptoFiatValues = async (coinIds: string[], fiatCurrency: string) => {
+  try {
+    const idsParam = coinIds.join(",");
+    const res = await fetch(`${API_BASE_URL}/simple-price?ids=${idsParam}&vs_currency=${fiatCurrency}`, {
+      credentials: "include",
     });
 
-    // batch request for all missing IDs
-    if (idsToFetch.length > 0) {
-      try {
-        const url = `https://api.coingecko.com/api/v3/simple/price?ids=${idsToFetch.join(",")}&vs_currencies=${currency}`;
-        const res = await fetch(url);
-        const data = await res.json();
+    const json = await res.json();
+    return json.data || {};
+  } catch (err) {
+    console.error("Batch price fetch failed:", err);
+    return {};
+  }
+};
 
-        const updatedCache = { ...priceCache };
-
-        idsToFetch.forEach((id) => {
-          const value = data[id]?.[currency];
-          if (value !== undefined) {
-            updatedCache[id] = {
-              value: {
-                ...updatedCache[id]?.value,
-                [currency]: value,
-              },
-              timestamp: Date.now(),
-            };
-            prices[id] = value;
-          }
-        });
-
-        setPriceCache(updatedCache);
-      } catch (error) {
-        console.error("Failed to fetch prices:", error);
-      }
-    }
-
-    // Return merged cached + new
-    coinIds.forEach((id) => {
-      const cached = priceCache[id]?.value?.[currency];
-      if (cached !== undefined) prices[id] = cached;
+ const getSingleCryptoFiatValue = async (coinId: string, fiatCurrency: string) => {
+  try {
+    const res = await fetch(`${API_BASE_URL}/simple-price/${coinId}?vs_currency=${fiatCurrency}`, {
+      credentials: "include",
     });
 
-    return prices;
-  };
+    const json = await res.json();
+    return json.data?.[coinId]?.[fiatCurrency] || 0;
+  } catch (err) {
+    console.error("Single price fetch failed:", err);
+    return 0;
+  }
+};
 
-  return { getCryptoFiatValues };
+  return { getSingleCryptoFiatValue, getBatchCryptoFiatValues };
+
 }
