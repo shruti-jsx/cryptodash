@@ -12,6 +12,7 @@ import {
 import { formatCurrency, roundToTwoDecimalPlaces } from "@/lib";
 // types
 import { DetailedCoin } from "@/types";
+import { useUserStore } from "@/stores/useUserStore";
 
 interface FavoriteCoinCardProps {
   portfolioCoin: DetailedCoin;
@@ -20,6 +21,7 @@ interface FavoriteCoinCardProps {
 export default function FavoriteCoinCard({
   portfolioCoin,
 }: FavoriteCoinCardProps) {
+  const currency = useUserStore((state) => state.currency);
   const coinPrice = portfolioCoin.info.currentPrice;
   let underTwoDecimals = false;
   if (coinPrice < 0.01) {
@@ -37,8 +39,8 @@ export default function FavoriteCoinCard({
       <CardContent className="flex justify-between items-center py-0 px-6">
         <p className="flex text-black dark:text-white text-3xl z-50">
           {underTwoDecimals
-            ? formatCurrency(coinPrice, "USD", 6)
-            : formatCurrency(coinPrice, "USD", 2)}
+            ? formatCurrency(coinPrice, currency, 6)
+            : formatCurrency(coinPrice, currency, 2)}
         </p>
         <span
           className={

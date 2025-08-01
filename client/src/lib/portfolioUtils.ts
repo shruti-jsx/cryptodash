@@ -1,6 +1,9 @@
 // ------------------------------- INTERFACE / TYPES -------------------------------
 import { API_BASE_URL } from "@/config";
 import { DetailedCoin, UndetailedCoin, CoinDB, PortfolioType } from "@/types";
+import { useUserStore } from "@/stores/useUserStore";
+
+
 
 interface CoinAdditionData {
   id: string;
@@ -64,55 +67,53 @@ export const fetchPortfolioCoinData = async (
   coins: string[],
   accessToken: string
 ): Promise<UndetailedCoin[]> => {
-  const fetchCoinData = async (
-    coin: string
-  ): Promise<UndetailedCoin | null> => {
-    const url = `${API_BASE_URL}/data/portfolio-coin-data?coin=${coin}`;
+  const fetchCoinData = async (coin: string): Promise<UndetailedCoin | null> => {
+  const currency = useUserStore.getState().currency;
+  const url = `${API_BASE_URL}/data/portfolio-coin-data?coin=${coin}`;
 
-    const options: RequestInit = {
-      credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${accessToken}`,
-      },
-    };
-
-    try {
-      const response = await fetch(url, options);
-      const data = await response.json();
-      return {
-        id: data.data.id,
-        name: data.data.name,
-        symbol: data.data.symbol,
-        image: {
-          thumb: data.data.image.thumb,
-          sm: data.data.image.small,
-          lg: data.data.image.large,
-        },
-        currentPrice: data.data.market_data.current_price.usd,
-        marketCap: data.data.market_data.market_cap.usd,
-        ath: data.data.market_data.ath.usd,
-        webSlug: data.data.market_data.web_slug,
-        description: data.data.description.en,
-        links: data.data.links,
-        genesis_date: data.data.genesis_date,
-        market_cap_rank: data.data.market_data.market_cap_rank,
-        fully_diluted_valuation:
-          data.data.market_data.fully_diluted_valuation.usd,
-        price_change_percentage_24h:
-          data.data.market_data.price_change_percentage_24h,
-        price_change_percentage_7d:
-          data.data.market_data.price_change_percentage_7d,
-        total_supply: data.data.market_data.total_supply,
-        max_supply: data.data.market_data.max_supply,
-        circulating_supply: data.data.market_data.circulating_supply,
-        sparkline: data.data.market_data.sparkline_7d.price,
-      };
-    } catch (error) {
-      console.error("Error fetching portfolio data for coin:", coin, error);
-      return null; // return null to indicate failure
-    }
+  const options: RequestInit = {
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
+    },
   };
+
+  try {
+    const response = await fetch(url, options);
+    const data = await response.json();
+
+    const market = data.data?.market_data || {};
+    return {
+      id: data.data.id,
+      name: data.data.name,
+      symbol: data.data.symbol,
+      image: {
+        thumb: data.data.image?.thumb,
+        sm: data.data.image?.small,
+        lg: data.data.image?.large,
+      },
+      currentPrice: market.current_price?.[currency] ?? null,
+      marketCap: market.market_cap?.[currency] ?? null,
+      ath: market.ath?.[currency] ?? null,
+      webSlug: market.web_slug ?? null,
+      description: data.data.description?.en ?? null,
+      links: data.data.links ?? {},
+      genesis_date: data.data.genesis_date ?? null,
+      market_cap_rank: market.market_cap_rank ?? null,
+      fully_diluted_valuation: market.fully_diluted_valuation?.[currency] ?? null,
+      price_change_percentage_24h: market.price_change_percentage_24h ?? null,
+      price_change_percentage_7d: market.price_change_percentage_7d ?? null,
+      total_supply: market.total_supply ?? null,
+      max_supply: market.max_supply ?? null,
+      circulating_supply: market.circulating_supply ?? null,
+      sparkline: market.sparkline_7d?.price ?? [],
+    };
+  } catch (error) {
+    console.error("Error fetching portfolio data for coin:", coin, error);
+    return null;
+  }
+};
 
   const requests = coins.map((coin) => fetchCoinData(coin));
   const results = await Promise.all(requests);

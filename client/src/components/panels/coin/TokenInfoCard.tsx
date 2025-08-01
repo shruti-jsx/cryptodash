@@ -7,13 +7,16 @@ import {
 } from "../../ui/card";
 import { formatCurrency } from "@/lib";
 import { DetailedCoin } from "@/types";
+import { useUserStore } from "@/stores/useUserStore";
 
 interface TokenInfoCardProps {
   coin: DetailedCoin | null;
   className?: string;
 }
 
+
 export default function TokenInfoCard({ coin, className }: TokenInfoCardProps) {
+  const currency = useUserStore((s)=>s.currency);
   if (!coin || !coin.info) {
     return (
       <Card className="flex flex-col items-center justify-center mb-4 w-full h-[300px] rounded-xl dark:bg-zinc-700">
@@ -55,7 +58,7 @@ export default function TokenInfoCard({ coin, className }: TokenInfoCardProps) {
         >
           <p className="font-semibold text-left">All-Time High:</p>
           <p className="font-normal text-right">
-            {coin.info.ath ? formatCurrency(coin.info.ath, "USD", 8) : "N/A"}
+            {coin.info.ath ? formatCurrency(coin.info.ath, currency, 8) : "N/A"}
           </p>
 
           <p className="font-semibold text-left">Market Cap Rank:</p>
@@ -65,13 +68,13 @@ export default function TokenInfoCard({ coin, className }: TokenInfoCardProps) {
 
           <p className="font-semibold text-left">Market Cap:</p>
           <p className="font-normal text-right">
-            {coin.info.marketCap ? formatCurrency(coin.info.marketCap) : "N/A"}
+            {coin.info.marketCap ? formatCurrency(coin.info.marketCap, currency) : "N/A"}
           </p>
 
           <p className="font-semibold text-left">Fully Diluted Value:</p>
           <p className="font-normal text-right">
             {coin.info.fully_diluted_valuation
-              ? formatCurrency(Number(coin.info.fully_diluted_valuation))
+              ? formatCurrency(Number(coin.info.fully_diluted_valuation), currency)
               : "N/A"}
           </p>
 

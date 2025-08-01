@@ -6,6 +6,7 @@ import {
   defaultPortfolio,
 } from "@/types";
 import { fetchAndCombinePortfolioData } from "@/lib";
+type Currency = "usd" | "inr";
 
 interface UserStore {
   accessToken: string;
@@ -22,6 +23,9 @@ interface UserStore {
 
   portfolioLoading: boolean;
   setPortfolioLoading: (portfolioLoading: boolean) => void;
+
+  currency: Currency;
+  setCurrency: (currency: Currency) => void;
 
   fetchAndSetPortfolioData: () => Promise<void>;
 }
@@ -60,6 +64,12 @@ export const useUserStore = create<UserStore>((set, get) => ({
     } finally {
       setPortfolioLoading(false);
     }
+  },
+    currency: (localStorage.getItem("currency") as Currency) || "usd",
+
+  setCurrency: (currency) => {
+    localStorage.setItem("currency", currency);
+    set({ currency });
   },
   // --------------------------------------------------------- //
 }));

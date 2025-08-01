@@ -22,6 +22,7 @@ interface HoldingsCardProps {
 }
 
 export default function HoldingsCard({ coin, className }: HoldingsCardProps) {
+  const currency = useUserStore((s) => s.currency);
   const portfolio = useUserStore((state) => state.portfolio);
   const coinInPortfolio = portfolio.detailed.find(({ id }) => id === coin?.id);
 
@@ -78,10 +79,10 @@ export default function HoldingsCard({ coin, className }: HoldingsCardProps) {
 
         <div className="flex flex-col">
           <p className="text-zinc-500 text-xl font-semibold pr-2 md:text-3xl lg:text-2xl">
-            USD
+            {currency}
           </p>
           <p className="text-lg font-semibold md:text-2xl lg:text-3xl">
-            {formatCurrency(coin.totalValue)}
+            {formatCurrency(coin.totalValue, currency)}
           </p>
         </div>
       </CardContent>

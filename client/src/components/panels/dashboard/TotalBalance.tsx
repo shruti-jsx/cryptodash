@@ -14,6 +14,7 @@ export default function TotalBalance({ className }: TotalBalanceProps) {
   const portfolio = useUserStore((state) => state.portfolio);
   const portfolioLoading = useUserStore((state) => state.portfolioLoading);
   const [isBalanceHidden, setIsBalanceHidden] = useState<boolean>(false);
+  const currency = useUserStore((s)=> s.currency);
 
   const totalValueArray = portfolio.detailed.map(
     (coinObject) => coinObject.totalValue
@@ -84,7 +85,7 @@ export default function TotalBalance({ className }: TotalBalanceProps) {
             <BlurredSkeleton className="w-[50%] h-12 mt-2 bg-[#262626]" />
           ) : (
             <p className="text-5xl mt-2">
-              {formatCurrency(totalUsdPortfolioValue)}
+              {formatCurrency(totalUsdPortfolioValue, currency)}
             </p>
           )}
 

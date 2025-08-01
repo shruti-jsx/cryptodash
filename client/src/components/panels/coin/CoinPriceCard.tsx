@@ -1,6 +1,8 @@
 import { formatCurrency } from "@/lib";
 import { Card, CardDescription, CardHeader, CardTitle } from "../../ui/card";
 import { DetailedCoin } from "@/types";
+import { useUserStore } from "@/stores/useUserStore";
+import { Currency } from "lucide-react";
 
 interface CoinPriceCardProps {
   coin: DetailedCoin | null;
@@ -8,6 +10,7 @@ interface CoinPriceCardProps {
 }
 
 export default function CoinPriceCard({ coin, className }: CoinPriceCardProps) {
+  const currency = useUserStore((s)=> s.currency);
   if (!coin || !coin.info) {
     return (
       <Card className="flex flex-col items-center justify-center  mb-4 w-full h-[150px] rounded-xl dark:bg-zinc-700">
@@ -57,8 +60,8 @@ export default function CoinPriceCard({ coin, className }: CoinPriceCardProps) {
               }`}
             >
               {isLowPrice
-                ? formatCurrency(coin.info.currentPrice, "USD", 6)
-                : formatCurrency(coin.info.currentPrice, "USD", 2)}
+                ? formatCurrency(coin.info.currentPrice, currency, 6)
+                : formatCurrency(coin.info.currentPrice, currency, 2)}
             </span>
           </div>
         </CardTitle>

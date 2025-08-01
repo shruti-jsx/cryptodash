@@ -20,11 +20,13 @@ import {
 import { formatCurrency } from "@/lib";
 import { API_BASE_URL } from "@/config";
 
+
 interface TotalMcapCardProps {
   className?: string;
 }
 
 export default function TotalMcapCard({ className = "" }: TotalMcapCardProps) {
+  const currency = useUserStore((s) => s.currency);
   const [totalMcap, setTotalMcap] = useState<string>("");
   const [lastUpdated, setLastUpdated] = useState<string>("");
   const accessToken = useUserStore((state) => state.accessToken);
@@ -43,17 +45,17 @@ export default function TotalMcapCard({ className = "" }: TotalMcapCardProps) {
       setLastUpdated(lastUpdatedDate.toLocaleString());
 
       if (now.getTime() - timestamp < expiryTime) {
-        const untruncatedTotalMcap = data.usd;
+        const untruncatedTotalMcap = data[currency];
         const truncatedTotalMcap = Math.trunc(Number(untruncatedTotalMcap));
 
-        setTotalMcap(formatCurrency(truncatedTotalMcap, "usd", 2, 0));
+        setTotalMcap(formatCurrency(truncatedTotalMcap, currency, 2, 0));
         return;
       }
     }
 
     const url = `${API_BASE_URL}/data/total-market-cap`;
     const options: RequestInit = {
-      credentials: "include",
+      credentials: "include", 
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
@@ -69,7 +71,7 @@ export default function TotalMcapCard({ className = "" }: TotalMcapCardProps) {
         JSON.stringify({ data: jsonData.data, timestamp: currentTimestamp })
       );
 
-      const untruncatedTotalMcap = jsonData.data.usd;
+      const untruncatedTotalMcap = jsonData.data[currency];
       const truncatedTotalMcap = Math.trunc(Number(untruncatedTotalMcap));
 
       setTotalMcap(formatCurrency(truncatedTotalMcap));

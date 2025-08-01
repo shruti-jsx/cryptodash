@@ -31,7 +31,9 @@ interface PortfolioEntryLineProps {
   coin: DetailedCoin;
 }
 
+
 export default function PortfolioCard() {
+  
   const accessToken = useUserStore((state) => state.accessToken);
   const portfolio = useUserStore((state) => state.portfolio);
   const portfolioLoading = useUserStore((state) => state.portfolioLoading);
@@ -178,6 +180,7 @@ export default function PortfolioCard() {
 }
 
 function PortfolioEntryLine({ coin }: PortfolioEntryLineProps) {
+  const currency = useUserStore((state) => state.currency);
   if (!coin || !coin.info || !coin.info.image) {
     return (
       <Skeleton className="h-[50px] w-full rounded-xl mt-6 dark:bg-zinc-400" />
@@ -193,7 +196,7 @@ function PortfolioEntryLine({ coin }: PortfolioEntryLineProps) {
         <div className="grid-col-2 flex justify-between">
           <div className="flex flex-col">
             <p>{coin.name}</p>
-            <p className="text-zinc-500">{formatCurrency(coin.totalValue)}</p>
+            <p className="text-zinc-500">{formatCurrency(coin.totalValue, currency)}</p>
           </div>
           <div className="flex items-center">
             <p className="text-sm">

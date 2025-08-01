@@ -1,4 +1,4 @@
-// ui
+import { useEffect, useState } from "react";
 import {
   Table,
   TableBody,
@@ -8,10 +8,11 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Skeleton } from "../../ui/skeleton";
-// utils
 import { formatCurrency, roundToTwoDecimalPlaces } from "@/lib";
 import { useNavigate } from "react-router-dom";
 import { AddedCoin } from "@/hooks/useCoinSearch";
+import { useUserStore } from "@/stores/useUserStore";
+import useCryptoFiatValues from "@/hooks/useCryptoFiatValues";
 
 export interface CoinObject {
   ath: number;
@@ -43,7 +44,7 @@ export interface CoinObject {
 }
 
 interface CryptoListTableProps {
-  cryptoList: (CoinObject | AddedCoin)[];
+  cryptoList: (CoinObject | AddedCoin)[]; // from explore or search
   loading: boolean;
 }
 
@@ -52,6 +53,25 @@ export default function CryptoListTable({
   loading,
 }: CryptoListTableProps) {
   const navigate = useNavigate();
+  const currency = useUserStore((state) => state.currency);
+  const { getCryptoFiatValues } = useCryptoFiatValues();
+  const [priceMap, setPriceMap] = useState<{ [key: string]: number }>({});
+
+  useEffect(() => {
+  const fetchPrices = async () => {
+    // collect all unique IDs regardless of type
+    const ids = cryptoList.map((coin) => coin.id);
+
+    if (ids.length > 0) {
+      const prices = await getCryptoFiatValues(ids, currency);
+      setPriceMap(prices);
+    }
+  };
+
+  fetchPrices();
+}, [cryptoList, currency]);
+
+
   const handleRowClick = (coinId: string) => {
     navigate(`/app/coin/${coinId}`);
   };
@@ -71,6 +91,14 @@ export default function CryptoListTable({
       <TableBody>
         {cryptoList.map((coin, i) => {
           const isCoinObject = "current_price" in coin;
+          const coinPrice = priceMap[coin.id] ?? ("current_price" in coin ? coin.current_price : null);
+
+
+          const marketCap = isCoinObject
+            ? coin.market_cap
+            : priceMap[coin.id] ?? null;
+
+
           return (
             <TableRow
               key={`${coin.name}${i}`}
@@ -88,11 +116,14 @@ export default function CryptoListTable({
                 <img
                   src={isCoinObject ? coin.image : coin.thumb}
                   alt={`${coin.name} logo`}
+                  className="w-6 h-6"
                 />
               </TableCell>
               <TableCell>{coin.name}</TableCell>
               <TableCell>
-                {isCoinObject ? formatCurrency(coin.current_price) : "N/A"}
+                {coinPrice !== null
+                  ? formatCurrency(coinPrice, currency)
+                  : "N/A"}
               </TableCell>
               <TableCell
                 className={
@@ -142,8 +173,8 @@ export default function CryptoListTable({
                 </div>
               </TableCell>
               <TableCell className="text-right">
-                {isCoinObject
-                  ? formatCurrency(coin.market_cap, "USD", 2, 0)
+                {marketCap !== null
+                  ? formatCurrency(marketCap, currency, 2, 0)
                   : "N/A"}
               </TableCell>
             </TableRow>

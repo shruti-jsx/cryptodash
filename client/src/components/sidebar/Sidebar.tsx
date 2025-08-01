@@ -1,7 +1,13 @@
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import { useUserStore } from "@/stores/useUserStore";
 
 export default function Sidebar() {
+  const currency = useUserStore((s) => s.currency);
+  const setCurrency = useUserStore((s) => s.setCurrency);
+
+  
+
   return (
     <div className="md:px-4">
       <menu className="flex justify-center mx-1 md:flex-col">
@@ -90,6 +96,20 @@ export default function Sidebar() {
             </Button>
           </Link>
         </li>
+        <li className="mx-1 my-2 flex items-center justify-center md:justify-start">
+          <select
+            value={currency}
+            onChange={(e) => {
+              setCurrency(e.target.value as "usd" | "inr");
+              window.location.reload(); // force refresh
+            }}
+            className="w-full md:w-[7.5rem] rounded-lg border border-zinc-700 bg-zinc-900 text-white text-sm py-1.5 px-2 focus:outline-none focus:ring-1 focus:ring-white transition"
+          >
+            <option value="usd">USD</option>
+            <option value="inr">INR</option>
+          </select>
+        </li>
+
       </menu>
     </div>
   );
