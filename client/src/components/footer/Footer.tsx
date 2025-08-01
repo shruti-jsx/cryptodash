@@ -27,6 +27,9 @@ export default function Footer() {
           <Link className="text-sm" to={"/faq"}>
             FAQ
           </Link>
+          <Link className="text-sm" to="/">
+            Developed By Shruti Tingare
+          </Link>
         </div>
 
         <div className="flex flex-col">
