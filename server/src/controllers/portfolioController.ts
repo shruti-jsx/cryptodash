@@ -53,7 +53,7 @@ export const getPortfolioValues = async (
   res: Response
 ) => {
   try {
-    const currency = (req.query.currency || "inr") as "usd" | "inr";
+    const currency = (req.query.currency || "usd") as "usd" | "inr";
     if (!req.user) {
       return res.status(400).json({
         success: false,
