@@ -116,7 +116,7 @@ Open your browser at: [http://localhost:5173](http://localhost:5173)
 
 ![Homepage](./public/desktop-final-1.png)
 
-### 🔹 Portfolio Tracker
+### 🔹 Portfolio Tracker(Assets)
 
 ![Holdings](./public/desktop-final-2.png)
 
@@ -127,6 +127,10 @@ Open your browser at: [http://localhost:5173](http://localhost:5173)
 ### 🔹 Market Insights
 
 ![Insights](./public/desktop-final-4.png)
+
+### 🔹 Coin Details
+
+![Coins](./public/desktop-final-5.png)
 
 ---
 
