@@ -1,4 +1,4 @@
-// ui
+import { useNavigate } from "react-router-dom";
 import SparkLineChart from "@/charts/SparkLineChart";
 import {
   Card,
@@ -8,9 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-// utils
 import { formatCurrency, roundToTwoDecimalPlaces } from "@/lib";
-// types
 import { DetailedCoin } from "@/types";
 import { useUserStore } from "@/stores/useUserStore";
 
@@ -22,14 +20,19 @@ export default function FavoriteCoinCard({
   portfolioCoin,
 }: FavoriteCoinCardProps) {
   const currency = useUserStore((state) => state.currency);
+  const navigate = useNavigate();
+
   const coinPrice = portfolioCoin.info.currentPrice;
-  let underTwoDecimals = false;
-  if (coinPrice < 0.01) {
-    underTwoDecimals = true;
-  }
+  const underTwoDecimals = coinPrice < 0.01;
+
+  const handleClick = () => {
+    navigate(`/app/coin/${portfolioCoin.id.toLowerCase()}`, {
+      state: { coin: portfolioCoin },
+    });
+  };
 
   return (
-    <Card>
+    <Card onClick={handleClick} className="cursor-pointer hover:shadow-md transition">
       <CardHeader>
         <CardTitle className="z-50">{portfolioCoin.name}</CardTitle>
         <CardDescription className="z-50">
