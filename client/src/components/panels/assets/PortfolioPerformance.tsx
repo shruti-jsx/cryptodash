@@ -16,36 +16,39 @@ export default function PortfolioPerformance() {
 
   const userId = useUserStore((state) => state.user?.userId);
   const accessToken = useUserStore((state) => state.accessToken) ?? "";
+  const currency = useUserStore((state) => state.currency);
+  
 
   useEffect(() => {
-    const loadPortfolioData = async () => {
-      if (!userId || !accessToken) {
-        console.warn("Missing userId or accessToken");
+  const loadPortfolioData = async () => {
+    if (!userId || !accessToken) {
+      console.warn("Missing userId or accessToken");
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      const data = await fetchPortfolioValues(accessToken, currency);
+      console.log("Fetched portfolio values:", data);
+
+      if (!data || data.length === 0) {
+        console.warn("No portfolio data available.");
         setIsLoading(false);
         return;
       }
 
-      try {
-        const data = await fetchPortfolioValues(accessToken);
-        console.log("Fetched portfolio values:", data);
+      const sorted = sortDataByTimestamp(data);
+      setChartData(sorted); // ✅ sorted must contain timestamp + value
+    } catch (err) {
+      console.error("Failed to fetch portfolio performance:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-        if (!data || data.length === 0) {
-          console.warn("No portfolio data available.");
-          setIsLoading(false);
-          return;
-        }
+  loadPortfolioData();
+}, [userId, accessToken, currency]); // ✅ Add currency here
 
-        const sorted = sortDataByTimestamp(data);
-        setChartData(sorted); // ✅ sorted must contain timestamp + value
-      } catch (err) {
-        console.error("Failed to fetch portfolio performance:", err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadPortfolioData();
-  }, [userId, accessToken]);
 
   return (
     <Card className="border-t-2 border-black p-6 w-full">

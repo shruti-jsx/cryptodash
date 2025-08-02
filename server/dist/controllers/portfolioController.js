@@ -42,6 +42,7 @@ const getPortfolio = (req, res) => __awaiter(void 0, void 0, void 0, function* (
 exports.getPortfolio = getPortfolio;
 const getPortfolioValues = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
+        const currency = (req.query.currency || "inr");
         if (!req.user) {
             return res.status(400).json({
                 success: false,
@@ -53,8 +54,24 @@ const getPortfolioValues = (req, res) => __awaiter(void 0, void 0, void 0, funct
         if (!user) {
             return res.status(404).json({ success: false, msg: "User not found" });
         }
-        console.log(user.portfolioValues);
-        res.json({ success: true, data: user.portfolioValues });
+        // If your user has only USD values saved, you need to convert them dynamically here:
+        // OR store both USD and INR values per entry in future.
+        const values = yield Promise.all(user.portfolioValues.map((entry) => __awaiter(void 0, void 0, void 0, function* () {
+            const valueInUSD = entry.value;
+            let convertedValue = valueInUSD;
+            if (currency === "inr") {
+                const inrRateRes = yield fetch("https://api.coingecko.com/api/v3/exchange_rates");
+                const exchangeData = yield inrRateRes.json();
+                const inrRate = exchangeData.rates.inr.value || 83;
+                convertedValue = valueInUSD * inrRate;
+            }
+            return {
+                timestamp: entry.timestamp,
+                value: parseFloat(convertedValue.toFixed(2)),
+            };
+        })));
+        console.log(values);
+        res.json({ success: true, data: values });
     }
     catch (err) {
         console.error("Failed to retrieve portfolio values:", err);

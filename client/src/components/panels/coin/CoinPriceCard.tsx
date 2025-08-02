@@ -9,10 +9,11 @@ interface CoinPriceCardProps {
 }
 
 export default function CoinPriceCard({ coin, className }: CoinPriceCardProps) {
-  const currency = useUserStore((s)=> s.currency);
+  const currency = useUserStore((s) => s.currency);
+
   if (!coin || !coin.info) {
     return (
-      <Card className="flex flex-col items-center justify-center  mb-4 w-full h-[150px] rounded-xl dark:bg-zinc-700">
+      <Card className="flex flex-col items-center justify-center mb-4 w-full h-[150px] rounded-xl dark:bg-zinc-700">
         <CardTitle className="flex items-center gap-2">
           <svg
             className="w-8 h-8"
@@ -30,9 +31,8 @@ export default function CoinPriceCard({ coin, className }: CoinPriceCardProps) {
           </svg>
           Uh oh, we encountered an error.
         </CardTitle>
-        <CardDescription className="max-w-[40%] text-center">
-          Please try refreshing the site, or if the error persists, get in touch
-          with us.
+        <CardDescription className="max-w-[80%] text-center">
+          Please try refreshing the site, or if the error persists, get in touch with us.
         </CardDescription>
       </Card>
     );
@@ -41,27 +41,27 @@ export default function CoinPriceCard({ coin, className }: CoinPriceCardProps) {
   const isLowPrice = coin.info.currentPrice < 0.1;
 
   return (
-    <Card className={`${className} flex-col justify-center`}>
-      <CardHeader className="p-10">
-        <CardTitle className="flex gap-2 justify-center">
+    <Card className={`${className} flex flex-col justify-center w-full`}>
+      <CardHeader className="p-4 md:p-6">
+        <CardTitle className="flex flex-col sm:flex-row items-center justify-center gap-4">
           <img
             src={coin.info.image.lg}
             alt="Cryptocurrency Icon"
-            className="h-20 md:h-28"
+            className="h-16 w-16 sm:h-20 sm:w-20 md:h-28 md:w-28"
           />
-          <div>
-            <span className="text-xl md:text-3xl ">
+          <div className="text-center sm:text-left">
+            <div className="text-lg sm:text-xl md:text-3xl font-semibold">
               {coin.name} &#40;{coin.info.symbol.toUpperCase()}&#41;
-            </span>
-            <span
-              className={`flex justify-center ${
-                isLowPrice ? "text-4xl" : "text-5xl"
+            </div>
+            <div
+              className={`mt-2 font-bold text-center sm:text-left ${
+                isLowPrice ? "text-3xl sm:text-4xl" : "text-4xl sm:text-5xl"
               }`}
             >
               {isLowPrice
                 ? formatCurrency(coin.info.currentPrice, currency, 6)
                 : formatCurrency(coin.info.currentPrice, currency, 2)}
-            </span>
+            </div>
           </div>
         </CardTitle>
       </CardHeader>

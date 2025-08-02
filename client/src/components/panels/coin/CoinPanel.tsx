@@ -32,18 +32,11 @@ export default function CoinPanel() {
   const locationPath = location.pathname.split("/");
   const coinId = locationPath[locationPath.length - 1];
 
-  
   useEffect(() => {
     const initializeCoinData = async () => {
-      // check if coin is within portfolio
-      // if it is - use location.state.coin to set coinData
-      // if not - run fetchCoinData() and set result to coinData
-
       setIsLoading(true);
       try {
-        const coinInPortfolio = portfolio.detailed.find(
-          ({ id }) => id === coinId
-        );
+        const coinInPortfolio = portfolio.detailed.find(({ id }) => id === coinId);
 
         if (coinInPortfolio) {
           setCoinData(coinInPortfolio);
@@ -51,15 +44,8 @@ export default function CoinPanel() {
         }
 
         const fetchedData = await fetchPortfolioCoinData([coinId], accessToken);
-
-        if (!fetchedData || fetchedData.length === 0) {
-          throw new Error(`Failed to fetch coin data for ${coinId}`);
-        }
-
-        const fetchedCoin = fetchedData[0];
-
-        setCoinData(adaptToPortfolioCoinType(fetchedCoin));
-        return;
+        if (!fetchedData || fetchedData.length === 0) throw new Error(`No data for ${coinId}`);
+        setCoinData(adaptToPortfolioCoinType(fetchedData[0]));
       } catch (err) {
         console.error(`Error fetching coin data for ${coinId}: ${err}`);
       } finally {
@@ -71,10 +57,7 @@ export default function CoinPanel() {
   }, [portfolio.detailed, accessToken, coinId]);
 
   useEffect(() => {
-    const handlePortfolioUpdate = ({
-      userId,
-      portfolio,
-    }: PortfolioUpdateEvent) => {
+    const handlePortfolioUpdate = ({ userId, portfolio }: PortfolioUpdateEvent) => {
       if (user.userId === userId && coinData) {
         const updatedCoin = portfolio.find((coin) => coin.id === coinData.id);
         if (updatedCoin) {
@@ -91,7 +74,6 @@ export default function CoinPanel() {
     };
 
     socket.on("portfolioUpdated", handlePortfolioUpdate);
-
     return () => {
       socket.off("portfolioUpdated", handlePortfolioUpdate);
     };
@@ -99,56 +81,53 @@ export default function CoinPanel() {
 
   if (isLoading || !coinData) {
     return (
-      <section className="grid gap-4 mb-6 grid-cols-1 lg:grid-cols-2">
-        <div className="row-start-1 gap-4">
-          <Skeleton className="w-full h-[150px] rounded-xl dark:bg-zinc-400 mb-4" />
-          <Skeleton className="row-start-2 lg:row-start-2 mt-4 w-full h-[150px] rounded-xl dark:bg-zinc-400" />
-        </div>
-        <Skeleton className="row-start-4 md:col-start-1 lg:row-start-3 w-full h-[300px] rounded-xl dark:bg-zinc-400" />
-        <Skeleton className="row-start-3 lg:row-span-3 w-full h-[200px] rounded-xl dark:bg-zinc-400" />
+      <section className="grid grid-cols-1 sm:grid-cols-1 gap-4 mb-6 p-2">
+        <Skeleton className="w-full h-[150px] rounded-xl dark:bg-zinc-400" />
+        <Skeleton className="w-full h-[150px] rounded-xl dark:bg-zinc-400" />
+        <Skeleton className="w-full h-[300px] rounded-xl dark:bg-zinc-400" />
+        <Skeleton className="w-full h-[200px] rounded-xl dark:bg-zinc-400" />
       </section>
     );
   }
 
   return (
-    <section className="grid gap-y-3 gap-x-3 mb-6 md:grid-cols-2 ">
+    <section className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 p-2">
+      {/* Price Card full width */}
       <CoinPriceCard
         coin={coinData}
-        className="w-full h-fit md:col-start-1 md:row-start-1 md:col-span-2"
+        className="w-full md:col-span-2"
       />
 
+      {/* Holdings and Converter stacked on small, side-by-side on md */}
       <HoldingsCard
         coin={coinData}
-        className="w-full md:col-start-1 md:row-start-2"
+        className="w-full"
       />
-
       <ConverterCard
         coin={coinData}
-        className="w-full md:col-start-2 md:row-start-2"
+        className="w-full"
       />
 
+      {/* Token Info full width */}
       <TokenInfoCard
         coin={coinData}
-        className="w-full md:col-start-1 md:row-start-3 md:col-span-2"
+        className="w-full md:col-span-2"
       />
 
+      {/* Chart and Description full width */}
       {coinData && (
         <CoinChartCard
           symbol={coinData.info.symbol}
-          className="w-full md:col-start-1 md:row-start-4 md:col-span-3"
+          className="w-full md:col-span-2"
         />
       )}
 
       {coinData.info.description && (
         <CoinDescriptionCard
           description={coinData.info.description}
-          className="w-full md:col-start-1 md:row-start-5 md:col-span-3"
+          className="w-full md:col-span-2"
         />
       )}
-
-      
-
-
     </section>
   );
 }

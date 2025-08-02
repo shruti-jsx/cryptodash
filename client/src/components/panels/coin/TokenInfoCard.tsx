@@ -14,9 +14,9 @@ interface TokenInfoCardProps {
   className?: string;
 }
 
-
 export default function TokenInfoCard({ coin, className }: TokenInfoCardProps) {
-  const currency = useUserStore((s)=>s.currency);
+  const currency = useUserStore((s) => s.currency);
+
   if (!coin || !coin.info) {
     return (
       <Card className="flex flex-col items-center justify-center mb-4 w-full h-[300px] rounded-xl dark:bg-zinc-700">
@@ -37,7 +37,7 @@ export default function TokenInfoCard({ coin, className }: TokenInfoCardProps) {
           </svg>
           Uh oh, we encountered an error.
         </CardTitle>
-        <CardDescription className="max-w-[40%] text-center">
+        <CardDescription className="max-w-[80%] text-center">
           Please try refreshing the site, or if the error persists, get in touch
           with us.
         </CardDescription>
@@ -46,62 +46,62 @@ export default function TokenInfoCard({ coin, className }: TokenInfoCardProps) {
   }
 
   return (
-    <Card className={`${className}`}>
-      <CardHeader>
-        <CardTitle>Token Information</CardTitle>
+    <Card className={`${className} w-full`}>
+      <CardHeader className="px-4 py-2 md:px-6 md:py-4">
+        <CardTitle className="text-lg md:text-xl">Token Information</CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="px-4 pb-4 md:px-6">
         <div
-          className={`grid grid-cols-2 gap-y-4 ${
+          className={`grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-3 ${
             !coin.info.description ? "" : "pb-6"
           }`}
         >
-          <p className="font-semibold text-left">All-Time High:</p>
-          <p className="font-normal text-right">
+          <p className="font-semibold text-left break-words">All-Time High:</p>
+          <p className="text-right break-words">
             {coin.info.ath ? formatCurrency(coin.info.ath, currency, 8) : "N/A"}
           </p>
 
-          <p className="font-semibold text-left">Market Cap Rank:</p>
-          <p className="font-normal text-right">
-            {coin.info.market_cap_rank ? coin.info.market_cap_rank : "N/A"}
+          <p className="font-semibold text-left break-words">Market Cap Rank:</p>
+          <p className="text-right break-words">
+            {coin.info.market_cap_rank ?? "N/A"}
           </p>
 
-          <p className="font-semibold text-left">Market Cap:</p>
-          <p className="font-normal text-right">
+          <p className="font-semibold text-left break-words">Market Cap:</p>
+          <p className="text-right break-words">
             {coin.info.marketCap ? formatCurrency(coin.info.marketCap, currency) : "N/A"}
           </p>
 
-          <p className="font-semibold text-left">Fully Diluted Value:</p>
-          <p className="font-normal text-right">
+          <p className="font-semibold text-left break-words">Fully Diluted Value:</p>
+          <p className="text-right break-words">
             {coin.info.fully_diluted_valuation
               ? formatCurrency(Number(coin.info.fully_diluted_valuation), currency)
               : "N/A"}
           </p>
 
-          <p className="font-semibold text-left">Total Supply:</p>
-          <p className="font-normal text-right">
+          <p className="font-semibold text-left break-words">Total Supply:</p>
+          <p className="text-right break-words">
             {coin.info.total_supply
               ? coin.info.total_supply.toLocaleString("en-US")
               : "N/A"}
           </p>
 
-          <p className="font-semibold text-left">Max Supply:</p>
-          <p className="font-normal text-right">
+          <p className="font-semibold text-left break-words">Max Supply:</p>
+          <p className="text-right break-words">
             {coin.info.max_supply
               ? coin.info.max_supply.toLocaleString("en-US")
               : "N/A"}
           </p>
 
-          <p className="font-semibold text-left">Circulating Supply:</p>
-          <p className="font-normal text-right">
+          <p className="font-semibold text-left break-words">Circulating Supply:</p>
+          <p className="text-right break-words">
             {coin.info.circulating_supply
               ? coin.info.circulating_supply.toLocaleString("en-US")
               : "N/A"}
           </p>
 
-          <p className="font-semibold text-left">Genesis Date:</p>
-          <p className="font-normal text-right">
-            {coin.info.genesis_date ? coin.info.genesis_date : "N/A"}
+          <p className="font-semibold text-left break-words">Genesis Date:</p>
+          <p className="text-right break-words">
+            {coin.info.genesis_date ?? "N/A"}
           </p>
         </div>
       </CardContent>

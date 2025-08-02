@@ -204,8 +204,8 @@ export const fetchAndCombinePortfolioData = async (
  * @returns Promise resolving to an array of objects which hold hourly information on the user's
  * portfolio values.
  */
-export const fetchPortfolioValues = async (accessToken: string) => {
-  const url = `${API_BASE_URL}/portfolio/portfolio-values`;
+export const fetchPortfolioValues = async (accessToken: string, currency: string) => {
+  const url = `${API_BASE_URL}/portfolio/portfolio-values?currency=${currency}`;
   const options: RequestInit = {
     method: "GET",
     credentials: "include",
@@ -226,7 +226,7 @@ export const fetchPortfolioValues = async (accessToken: string) => {
     if (!data.success) {
       throw new Error(data.msg || "Unknown error");
     }
-
+    console.log(data);
     return data.data;
   } catch (err) {
     throw new Error(`Failed to send GET portfolio values request: ${err}`);
