@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.fetchSearchResults = exports.fetchAllCoinsWithMarketDataRecursive = exports.fetchAllCoinsWithMarketDataPaginated = exports.fetchAllCoins = exports.fetchTotalMcapData = exports.fetchPortfolioCoinData = void 0;
+exports.fetchSinglePrice = exports.fetchSimplePrices = exports.fetchSearchResults = exports.fetchAllCoinsWithMarketDataRecursive = exports.fetchAllCoinsWithMarketDataPaginated = exports.fetchAllCoins = exports.fetchTotalMcapData = exports.fetchPortfolioCoinData = void 0;
 const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
 const { COINGECKO_API_KEY } = process.env;
@@ -192,3 +192,55 @@ const fetchSearchResults = (req, res) => __awaiter(void 0, void 0, void 0, funct
     }
 });
 exports.fetchSearchResults = fetchSearchResults;
+// BATCH PRICE FETCH
+const fetchSimplePrices = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const ids = req.query.ids;
+    const vsCurrency = req.query.vs_currency;
+    if (!ids || !vsCurrency) {
+        return res.status(400).json({ success: false, msg: "Missing ids or vs_currency" });
+    }
+    const url = `https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=${vsCurrency}`;
+    try {
+        const response = yield fetch(url, {
+            headers: {
+                accept: "application/json",
+                "x-cg-demo-api-key": COINGECKO_API_KEY,
+            },
+        });
+        if (!response.ok)
+            throw new Error(`HTTP ${response.status}`);
+        const data = yield response.json();
+        res.status(200).json({ success: true, data });
+    }
+    catch (error) {
+        console.error("Batch price fetch error:", error);
+        res.status(500).json({ success: false, msg: "Batch price fetch failed" });
+    }
+});
+exports.fetchSimplePrices = fetchSimplePrices;
+// SINGLE COIN PRICE FETCH
+const fetchSinglePrice = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const coinId = req.params.coinId;
+    const vsCurrency = req.query.vs_currency;
+    if (!coinId || !vsCurrency) {
+        return res.status(400).json({ success: false, msg: "Missing coinId or vs_currency" });
+    }
+    const url = `https://api.coingecko.com/api/v3/simple/price?ids=${coinId}&vs_currencies=${vsCurrency}`;
+    try {
+        const response = yield fetch(url, {
+            headers: {
+                accept: "application/json",
+                "x-cg-demo-api-key": COINGECKO_API_KEY,
+            },
+        });
+        if (!response.ok)
+            throw new Error(`HTTP ${response.status}`);
+        const data = yield response.json();
+        res.status(200).json({ success: true, data });
+    }
+    catch (error) {
+        console.error("Single price fetch error:", error);
+        res.status(500).json({ success: false, msg: "Single price fetch failed" });
+    }
+});
+exports.fetchSinglePrice = fetchSinglePrice;

@@ -1,8 +1,5 @@
-// react
 import { useCallback, useEffect, useState } from "react";
-// store
 import { useUserStore } from "@/stores/useUserStore";
-// ui
 import {
   Card,
   CardContent,
@@ -16,10 +13,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-// utils
 import { formatCurrency } from "@/lib";
 import { API_BASE_URL } from "@/config";
-
 
 interface TotalMcapCardProps {
   className?: string;
@@ -36,54 +31,53 @@ export default function TotalMcapCard({ className = "" }: TotalMcapCardProps) {
     const cachedData = localStorage.getItem(cacheKey);
     const now = new Date();
 
-    // use cached data if it's within 24hrs
     if (cachedData) {
       const { data, timestamp } = JSON.parse(cachedData);
-      const expiryTime = 24 * 60 * 60 * 1000; // 24hrs in millisecs
+      const expiryTime = 24 * 60 * 60 * 1000;
       const lastUpdatedDate = new Date(timestamp);
 
       setLastUpdated(lastUpdatedDate.toLocaleString());
 
-      if (now.getTime() - timestamp < expiryTime) {
+      if (now.getTime() - timestamp < expiryTime && data[currency]) {
         const untruncatedTotalMcap = data[currency];
         const truncatedTotalMcap = Math.trunc(Number(untruncatedTotalMcap));
-
         setTotalMcap(formatCurrency(truncatedTotalMcap, currency, 2, 0));
         return;
       }
     }
 
-    const url = `${API_BASE_URL}/data/total-market-cap`;
-    const options: RequestInit = {
-      credentials: "include", 
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    };
-    // fetch new data if older than 24hrs
-    const res = await fetch(url, options);
-    const jsonData = await res.json();
+    try {
+      const res = await fetch(`${API_BASE_URL}/data/total-market-cap`, {
+        credentials: "include",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
 
-    if (jsonData.success) {
-      const currentTimestamp = now.getTime();
-      localStorage.setItem(
-        cacheKey,
-        JSON.stringify({ data: jsonData.data, timestamp: currentTimestamp })
-      );
+      const jsonData = await res.json();
 
-      const untruncatedTotalMcap = jsonData.data[currency];
-      const truncatedTotalMcap = Math.trunc(Number(untruncatedTotalMcap));
+      if (jsonData.success) {
+        const currentTimestamp = now.getTime();
+        localStorage.setItem(
+          cacheKey,
+          JSON.stringify({ data: jsonData.data, timestamp: currentTimestamp })
+        );
 
-      setTotalMcap(formatCurrency(truncatedTotalMcap));
-      setLastUpdated(new Date(currentTimestamp).toLocaleString());
-    } else {
-      console.error("Failed to fetch total mcap data");
+        const untruncatedTotalMcap = jsonData.data[currency];
+        const truncatedTotalMcap = Math.trunc(Number(untruncatedTotalMcap));
+        setTotalMcap(formatCurrency(truncatedTotalMcap, currency, 2, 0));
+        setLastUpdated(new Date(currentTimestamp).toLocaleString());
+      } else {
+        console.error("Failed to fetch total market cap.");
+      }
+    } catch (err) {
+      console.error("Error fetching market cap:", err);
     }
-  }, [accessToken]);
+  }, [accessToken, currency]); // 👈 include currency here
 
   useEffect(() => {
     fetchMcapData();
-  }, [fetchMcapData]);
+  }, [fetchMcapData]); // 👈 this will now re-run on currency change
 
   return (
     <div className={`${className}`}>
@@ -96,12 +90,7 @@ export default function TotalMcapCard({ className = "" }: TotalMcapCardProps) {
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger>
-                  <svg
-                    className="h-4 w-4"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
+                  <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none">
                     <path
                       d="M12 16V12M12 8H12.01M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
                       stroke="currentColor"
@@ -116,7 +105,7 @@ export default function TotalMcapCard({ className = "" }: TotalMcapCardProps) {
                     The total market capitalization of crypto is the real-time
                     calculation of all coins and tokens listed by crypto price
                     tracking websites. It is calculated by multiplying the
-                    current price of a cryptocurrency by its circulating supply
+                    current price of a cryptocurrency by its circulating supply.
                     <br />
                     <br />
                     &#40;Market Cap = Current Price x Circulating Supply&#41;

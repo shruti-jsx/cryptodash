@@ -1,6 +1,4 @@
-// react
-import { useState, useEffect } from "react";
-// ui
+import { useState, useEffect, useMemo } from "react";
 import { LegendProps, Pie, PieChart } from "recharts";
 import {
   Card,
@@ -17,14 +15,11 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-// store
 import { useUserStore } from "@/stores/useUserStore";
-// utils
 import { genRandomHexColor } from "@/lib";
-// types
+import { formatCurrency } from "@/lib";
 import { DetailedCoin, PortfolioType } from "@/types";
 
-// custom legend (only shown on small screens)
 const CustomChartLegendContent: React.FC<LegendProps> = ({ payload }) => {
   if (!payload) return null;
 
@@ -43,17 +38,16 @@ const CustomChartLegendContent: React.FC<LegendProps> = ({ payload }) => {
   );
 };
 
-// uses the first 7 colors defined in globabls.css,
-// then generates random hex for each subsequent color
 const getChartColor = (index: number): string => {
-  if (index < 7) {
-    return `hsl(var(--chart-${index + 1}))`;
-  }
+  if (index < 7) return `hsl(var(--chart-${index + 1}))`;
   return genRandomHexColor();
 };
 
-// generates chart data using the user's portfolio
-const generateChartData = (portfolio: PortfolioType) => {
+// Generate chart data using currency
+const generateChartData = (
+  portfolio: PortfolioType,
+  currency: "usd" | "inr"
+) => {
   if (portfolio.list.length <= 0) {
     return [
       {
@@ -64,19 +58,17 @@ const generateChartData = (portfolio: PortfolioType) => {
     ];
   }
 
-  const chartData = portfolio.detailed.map(
-    (coin: DetailedCoin, index: number) => ({
-      holding: coin.name,
-      value: Math.trunc(coin.totalValue),
-      fill: getChartColor(index),
-    })
-  );
-
-  return chartData;
+  return portfolio.detailed.map((coin: DetailedCoin, index: number) => ({
+    holding: coin.name,
+    value: Math.trunc(coin.totalValue), // already currency adjusted
+    formatted: formatCurrency(coin.totalValue, currency, 2, 0),
+    fill: getChartColor(index),
+  }));
 };
 
-// generates chart config using the user's portfolio
-const generateChartConfig = (portfolio: PortfolioType): ChartConfig => {
+const generateChartConfig = (
+  portfolio: PortfolioType
+): ChartConfig => {
   const config: ChartConfig = {
     coins: { label: "Coins" },
   };
@@ -93,19 +85,23 @@ const generateChartConfig = (portfolio: PortfolioType): ChartConfig => {
 
 export function CustomPieChart() {
   const portfolio = useUserStore((state) => state.portfolio);
+  const currency = useUserStore((state) => state.currency);
   const currentDate = new Date().toDateString();
-  const chartData = generateChartData(portfolio);
-  const chartConfig = generateChartConfig(portfolio);
   const [isLargeDisplay, setIsLargeDisplay] = useState(
     window.innerWidth >= 768
   );
 
-  // keeps track of screen size to determine if chart legend should show
+  const chartData = useMemo(
+    () => generateChartData(portfolio, currency),
+    [portfolio, currency]
+  );
+
+  const chartConfig = useMemo(() => generateChartConfig(portfolio), [portfolio]);
+
   useEffect(() => {
     const handleResize = () => {
       setIsLargeDisplay(window.innerWidth >= 768);
     };
-
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
@@ -114,7 +110,10 @@ export function CustomPieChart() {
     <Card className="flex flex-col overflow-auto">
       <CardHeader className="items-center pb-0">
         <CardTitle>Holding Breakdown</CardTitle>
-        <CardDescription>Measured in US dollars &#40;$&#41;</CardDescription>
+        <CardDescription>
+          Measured in {currency.toUpperCase()}{" "}
+          {currency === "usd" ? "($)" : "(₹)"}
+        </CardDescription>
       </CardHeader>
       <CardContent className="flex-1 pb-0">
         <ChartContainer
@@ -122,49 +121,48 @@ export function CustomPieChart() {
           className="mx-auto aspect-square max-h-[250px] pb-0 [&_.recharts-pie-label-text]:fill-foreground min-w-[300px] md:min-w-[450px]"
         >
           <PieChart>
-            <ChartTooltip content={<ChartTooltipContent hideLabel />} />
-            <Pie
-              className=""
-              data={chartData}
-              dataKey="value"
-              label={
-                isLargeDisplay
-                  ? ({ payload, ...props }) => {
-                      return (
-                        <text
-                          cx={props.cx}
-                          cy={props.cy}
-                          x={props.x}
-                          y={props.y}
-                          textAnchor={props.textAnchor}
-                          dominantBaseline={props.dominantBaseline}
-                          fill="hsla(var(--foreground))"
-                        >
-                          {`${
-                            chartConfig[payload.holding.toLowerCase()]?.label
-                          }`}
-                        </text>
-                      );
-                    }
-                  : false
-              }
-              labelLine={isLargeDisplay}
-              nameKey="holding"
-            />
-            {!isLargeDisplay && (
-              <ChartLegend
-                payload={chartData.map((entry, index) => ({
-                  value:
-                    chartConfig[entry.holding.toLowerCase()]?.label ||
-                    entry.holding,
-                  type: "square",
-                  id: index.toString(),
-                  color: entry.fill,
-                }))}
-                content={<CustomChartLegendContent />}
-              />
-            )}
-          </PieChart>
+  <ChartTooltip content={<ChartTooltipContent hideLabel />} />
+  <Pie
+    key={currency} // triggers re-render animation when currency changes
+    isAnimationActive={true} // enables animation
+    animationDuration={500} // optional: control duration
+    data={chartData}
+    dataKey="value"
+    nameKey="holding"
+    label={
+      isLargeDisplay
+        ? ({ payload, ...props }) => {
+            return (
+              <text
+                x={props.x}
+                y={props.y}
+                textAnchor={props.textAnchor}
+                dominantBaseline={props.dominantBaseline}
+                fill="hsla(var(--foreground))"
+              >
+                {payload.formatted}
+              </text>
+            );
+          }
+        : false
+    }
+    labelLine={isLargeDisplay}
+  />
+  {!isLargeDisplay && (
+    <ChartLegend
+      payload={chartData.map((entry, index) => ({
+        value:
+          chartConfig[entry.holding.toLowerCase()]?.label ||
+          entry.holding,
+        type: "square",
+        id: index.toString(),
+        color: entry.fill,
+      }))}
+      content={<CustomChartLegendContent />}
+    />
+  )}
+</PieChart>
+
         </ChartContainer>
       </CardContent>
       <CardFooter className="flex-col gap-2 text-sm">

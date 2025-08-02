@@ -5,6 +5,8 @@ import { useUserStore } from "@/stores/useUserStore";
 export default function Sidebar() {
   const currency = useUserStore((s) => s.currency);
   const setCurrency = useUserStore((s) => s.setCurrency);
+  const fetchAndSetPortfolioData = useUserStore((s) => s.fetchAndSetPortfolioData);
+
 
   
 
@@ -96,19 +98,24 @@ export default function Sidebar() {
             </Button>
           </Link>
         </li>
-        <li className="mx-1 my-2 flex items-center justify-center md:justify-start">
-          <select
-            value={currency}
-            onChange={(e) => {
-              setCurrency(e.target.value as "usd" | "inr");
-              window.location.reload(); // force refresh
-            }}
-            className="w-full md:w-[7.5rem] rounded-lg border border-zinc-700 bg-zinc-900 text-white text-sm py-1.5 px-2 focus:outline-none focus:ring-1 focus:ring-white transition"
-          >
-            <option value="usd">USD</option>
-            <option value="inr">INR</option>
-          </select>
+        <li className="mx-1 my-2">
+          <div className="flex items-center justify-center md:justify-start">
+            <div className="w-full md:w-[7.5rem]">
+              <select
+                value={currency}
+                onChange={(e) => {
+                  setCurrency(e.target.value as "usd" | "inr");
+                  fetchAndSetPortfolioData();
+                }}
+                className="w-full h-10 rounded-md border border-zinc-700 bg-zinc-900 text-sm text-white px-3 focus:outline-none focus:ring-1 focus:ring-white"
+              >
+                <option value="inr">INR</option>
+                <option value="usd">USD</option>
+              </select>
+            </div>
+          </div>
         </li>
+
 
       </menu>
     </div>

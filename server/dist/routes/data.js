@@ -16,4 +16,6 @@ router.get("/all-coins-with-market-data-recursive", passportJwt_1.authenticateJW
 router.get("/total-market-cap", passportJwt_1.authenticateJWT, dataController_1.fetchTotalMcapData);
 // GET -> /search?query=
 router.get("/search", passportJwt_1.authenticateJWT, dataController_1.fetchSearchResults);
+router.get("/simple-price", dataController_1.fetchSimplePrices);
+router.get("/simple-price/:coinId", dataController_1.fetchSinglePrice);
 exports.default = router;

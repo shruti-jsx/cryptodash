@@ -88,9 +88,36 @@ export const addPortfolioValue = async (userId: any, totalValue: number) => {
 
   try {
     // save portfolio value to mongodb
-    user.portfolioValues.push({ value: totalValue, timestamp: Date.now() });
+    user.portfolioValues.push({ value: totalValue, timestamp: new Date() });
     await user.save();
   } catch (err) {
     console.error("Failed to save portfolio value to db", err);
+  }
+};
+
+export const fetchCoinPricesInCurrency = async (
+  coinIds: string[],
+  currency: string
+): Promise<Record<string, number>> => {
+  const url = `https://api.coingecko.com/api/v3/simple/price?ids=${coinIds.join(
+    ","
+  )}&vs_currencies=${currency}`;
+  const headers: HeadersInit = {
+    accept: "application/json",
+    "x-cg-demo-api-key": process.env.COINGECKO_API_KEY!,
+  };
+
+  try {
+    const res = await fetch(url, { headers });
+    const data = await res.json();
+
+    const prices: Record<string, number> = {};
+    for (const id of coinIds) {
+      prices[id] = data[id]?.[currency] || 0;
+    }
+    return prices;
+  } catch (error) {
+    console.error("Failed to fetch coin prices from CoinGecko:", error);
+    return {};
   }
 };

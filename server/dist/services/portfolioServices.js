@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.addPortfolioValue = exports.fetchPortfolioValue = exports.fetchCoinPrice = void 0;
+exports.fetchCoinPricesInCurrency = exports.addPortfolioValue = exports.fetchPortfolioValue = exports.fetchCoinPrice = void 0;
 const User_1 = require("../models/User");
 const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
@@ -90,7 +90,7 @@ const addPortfolioValue = (userId, totalValue) => __awaiter(void 0, void 0, void
     }
     try {
         // save portfolio value to mongodb
-        user.portfolioValues.push({ value: totalValue, timestamp: Date.now() });
+        user.portfolioValues.push({ value: totalValue, timestamp: new Date() });
         yield user.save();
     }
     catch (err) {
@@ -98,3 +98,25 @@ const addPortfolioValue = (userId, totalValue) => __awaiter(void 0, void 0, void
     }
 });
 exports.addPortfolioValue = addPortfolioValue;
+const fetchCoinPricesInCurrency = (coinIds, currency) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
+    const url = `https://api.coingecko.com/api/v3/simple/price?ids=${coinIds.join(",")}&vs_currencies=${currency}`;
+    const headers = {
+        accept: "application/json",
+        "x-cg-demo-api-key": process.env.COINGECKO_API_KEY,
+    };
+    try {
+        const res = yield fetch(url, { headers });
+        const data = yield res.json();
+        const prices = {};
+        for (const id of coinIds) {
+            prices[id] = ((_a = data[id]) === null || _a === void 0 ? void 0 : _a[currency]) || 0;
+        }
+        return prices;
+    }
+    catch (error) {
+        console.error("Failed to fetch coin prices from CoinGecko:", error);
+        return {};
+    }
+});
+exports.fetchCoinPricesInCurrency = fetchCoinPricesInCurrency;

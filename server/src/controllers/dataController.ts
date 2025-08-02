@@ -227,7 +227,6 @@ export const fetchSimplePrices = async (req: Request, res: Response) => {
 
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const data = await response.json();
-    console.log("id: ",ids, " currency: ",vsCurrency, "Batch : ",data);
     res.status(200).json({ success: true, data });
   } catch (error) {
     console.error("Batch price fetch error:", error);
@@ -256,7 +255,6 @@ export const fetchSinglePrice = async (req: Request, res: Response) => {
 
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const data = await response.json();
-    console.log("Coin: ", coinId," Currency: ", vsCurrency,"  SingleData: ", data)
     res.status(200).json({ success: true, data });
   } catch (error) {
     console.error("Single price fetch error:", error);

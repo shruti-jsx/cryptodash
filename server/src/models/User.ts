@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 const { Schema } = mongoose;
 
+// Interfaces (Types Only)
 interface PortfolioValue {
   timestamp: Date;
   value: number;
@@ -12,8 +13,7 @@ interface PortfolioItem {
   addedAt: Date;
 }
 
-interface UserType {
-  _id: mongoose.Types.ObjectId;
+export interface UserType extends mongoose.Document {
   username: string;
   email: string;
   password: string;
@@ -24,6 +24,7 @@ interface UserType {
   updatedAt: Date;
 }
 
+// Schemas
 const portfolioValueSchema = new Schema({
   timestamp: { type: Date, default: Date.now },
   value: { type: Number },
@@ -65,5 +66,8 @@ const userSchema = new Schema(
   }
 );
 
-export const User = mongoose.model("User", userSchema);
-export type { UserType, PortfolioItem, PortfolioValue };
+// Typed Model Export
+export const User = mongoose.model<UserType>("User", userSchema);
+
+// Types Export (same as before)
+export type { PortfolioItem, PortfolioValue };

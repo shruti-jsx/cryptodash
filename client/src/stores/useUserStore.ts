@@ -65,11 +65,15 @@ export const useUserStore = create<UserStore>((set, get) => ({
       setPortfolioLoading(false);
     }
   },
-    currency: (localStorage.getItem("currency") as Currency) || "usd",
+    currency: (localStorage.getItem("currency") as Currency) || "inr",
 
   setCurrency: (currency) => {
-    localStorage.setItem("currency", currency);
-    set({ currency });
-  },
+  localStorage.setItem("currency", currency);
+  set({ currency });
+
+  // Notify other tabs
+  window.dispatchEvent(new Event("currency-changed"));
+},
+
   // --------------------------------------------------------- //
 }));

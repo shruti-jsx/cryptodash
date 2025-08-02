@@ -6,6 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.User = void 0;
 const mongoose_1 = __importDefault(require("mongoose"));
 const { Schema } = mongoose_1.default;
+// Schemas
 const portfolioValueSchema = new Schema({
     timestamp: { type: Date, default: Date.now },
     value: { type: Number },
@@ -42,4 +43,5 @@ const userSchema = new Schema({
 }, {
     timestamps: true,
 });
+// Typed Model Export
 exports.User = mongoose_1.default.model("User", userSchema);
