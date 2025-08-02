@@ -84,6 +84,8 @@ BUCKET_REGION=your_aws_s3_bucket_region
 AWS_ACCESS_KEY_ID=your_aws_access_key_id
 AWS_SECRET_ACCESS_KEY=your_aws_secret_access_key
 ORIGIN_URL=http://localhost:5173
+NODE_ENV=production
+NPM_CONFIG_PRODUCTION=false
 ```
 
 ---
